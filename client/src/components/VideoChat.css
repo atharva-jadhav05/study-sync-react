@@ -1,0 +1,134 @@
+.video-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: #202124;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* --- LAYOUTS --- */
+.video-stage {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    padding: 10px;
+}
+
+/* Mode 1: Grid Mode (Default) */
+.video-stage.grid-mode .participant-list.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto; /* Scrollbar if too many people */
+}
+
+/* Mode 2: Pinned Mode (Stage + Filmstrip) */
+.video-stage.has-pin {
+    flex-direction: row;
+}
+
+.main-stage {
+    flex: 3; /* Takes 75% width */
+    height: 100%;
+    padding-right: 10px;
+}
+
+.participant-list.filmstrip {
+    flex: 1; /* Takes 25% width */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+/* --- TILES --- */
+.video-tile {
+    position: relative;
+    background: #3c4043;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.video-tile:hover {
+    border-color: #8ab4f8; /* Highlight on hover */
+}
+
+.video-tile video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-tile.pinned video {
+    object-fit: contain; /* Don't crop pinned screen shares */
+}
+
+.video-tile.placeholder {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.user-name {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.screen-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+/* --- CONTROL BAR --- */
+.control-bar {
+    height: 60px;
+    background: #202124;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid #3c4043;
+}
+
+.control-bar button {
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: none;
+    background: #3c4043;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.control-bar button:hover {
+    background: #4a4e51;
+}
+
+.control-bar button.red {
+    background: #ea4335;
+}
+
+.control-bar button.leave-btn {
+    background: #ea4335;
+    padding: 10px 30px;
+}
