@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
 // Pages & Components
@@ -13,9 +13,12 @@ import './App.css';
 
 // --- THE MAIN ROOM COMPONENT ---
 const StudyRoom = () => {
-  const { roomId } = useParams(); // Get ID from URL (e.g., /room/abc-123)
+  const { roomId } = useParams(); 
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   const [socket, setSocket] = useState(null);
-
+  
   useEffect(() => {
     // Connect to server
     const newSocket = io('http://localhost:3000');
@@ -28,7 +31,14 @@ const StudyRoom = () => {
     return () => newSocket.disconnect();
   }, [roomId]);
 
-  if (!socket) return <div className="loading">Connecting...</div>;
+  const handleLeaveRoom = () => {
+      if (socket) socket.disconnect();
+      navigate('/');
+      window.location.reload(); 
+  };
+
+  // Wait for socket to be ready before rendering room
+  if (!socket) return <div className="loading">Connecting to Study Sync...</div>;
 
   return (
     <div className="app-container">
@@ -41,10 +51,12 @@ const StudyRoom = () => {
       {/* Main Video Grid */}
       <div className="main-content">
         <div className="video-grid">
-            <VideoChat roomUrl='i5pmr0'/>
-           {/* <div className="user-box">You</div>
-           <div className="user-box">Friend 1</div>
-           <div className="user-box">Friend 2</div> */}
+           {/* 👇 UPDATED: We pass 'socket' so VideoChat can get its own token */}
+           <VideoChat 
+               roomId={roomId} 
+               socket={socket} 
+               onLeave={handleLeaveRoom} 
+           />
         </div>
       </div>
 

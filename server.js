@@ -1,12 +1,14 @@
 const express = require('express');
 const path = require('path');
-const cors = require('cors'); 
-const axios = require('axios'); // NEW: For talking to Daily.co
+const cors = require('cors');
+const { AccessToken } = require('livekit-server-sdk'); // NEW: LiveKit SDK
 const app = express();
 const http = require('http').createServer(app);
 
 // --- CONFIGURATION ---
-const DAILY_API_KEY = "73da74f9603b09d53589bf377c409547b2f2ba25f62212154b00c94622a6a6ff"; // <--- PASTE KEY HERE
+// These match the keys shown in your terminal when running livekit-server --dev
+const LIVEKIT_API_KEY = "devkey";
+const LIVEKIT_API_SECRET = "secret";
 
 app.use(cors({ origin: "http://localhost:5173", methods: ["GET", "POST"] }));
 
@@ -22,55 +24,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // --- MEMORY STORAGE ---
-const roomTimers = {}; 
+const roomTimers = {};
 const chatHistory = {};
-const roomVideos = {}; 
-const roomCleanupTimers = {}; 
-const roomDailyUrls = {}; // NEW: Stores the video link for each room
+const roomVideos = {};
+const roomCleanupTimers = {};
+// Note: We don't need roomDailyUrls anymore because LiveKit rooms are created on-demand
 
-// --- HELPER: Create Daily Room ---
-async function createDailyRoom(roomId) {
-  try {
-    const response = await axios.post(
-      'https://api.daily.co/v1/rooms',
-      {
-        name: `study-${roomId}`, // Unique name: study-o3pipg
-        properties: {
-          enable_chat: false, // We use our own chat
-          start_video_off: false,
-          start_audio_off: false,
-          exp: Math.round(Date.now() / 1000) + 86400 // Expire in 24 hours
-        }
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${DAILY_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    return response.data.url;
-  } catch (error) {
-    // If room already exists, we might get an error, but that's okay (user re-creating same room)
-    // We can just log it.
-    console.log("Daily API Note:", error.response?.data?.error || error.message);
-    return null; 
-  }
-}
-
-// 1. CREATE ROOM ENDPOINT
-app.get('/api/create-room', async (req, res) => {
+// 1. CREATE ROOM ENDPOINT (Simplified)
+app.get('/api/create-room', (req, res) => {
+  // We just generate an ID. The room is created automatically when the first person joins.
   const roomId = Math.random().toString(36).substr(2, 6);
-  
-  // Create the video room on Daily.co
-  const dailyUrl = await createDailyRoom(roomId);
-  
-  // Even if API fails, we proceed (the video chat just won't work, but app won't crash)
-  if (dailyUrl) {
-    roomDailyUrls[roomId] = dailyUrl; 
-  }
-  
-  res.json({ roomId, dailyUrl });
+  res.json({ roomId });
 });
 
 io.on('connection', (socket) => {
@@ -109,14 +73,27 @@ io.on('connection', (socket) => {
         seekTime: currentSeek
       });
     }
-
-    // NEW: Send Video Chat URL to the joiner
-    const dailyUrl = roomDailyUrls[roomId];
-    if (dailyUrl) {
-        socket.emit('daily-url', dailyUrl);
-    }
   });
 
+ // --- LIVEKIT TOKEN GENERATION ---
+  // 👇 1. Add 'async' here
+  socket.on('get-livekit-token', async ({ roomId, userName }) => {
+    if (!roomId) return;
+    
+    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: userName,
+    });
+
+    at.addGrant({ roomJoin: true, room: roomId });
+
+    // 👇 2. Add 'await' here so the Promise finishes
+    const token = await at.toJwt();
+    
+    console.log("🔑 Generated Token:", token); // This should now be a long string "eyJ..."
+
+    // Send the plain string
+    socket.emit('livekit-token', token);
+  });
   // 2. VIDEO REQUEST (Backup)
   socket.on('request-video-state', (roomId) => {
     const videoState = roomVideos[roomId];
@@ -135,7 +112,7 @@ io.on('connection', (socket) => {
 
   // 3. CHAT
   socket.on('chat-message', ({ roomId, message }) => {
-    const msg = { sender: 'Anonymous', message }; 
+    const msg = { sender: 'Anonymous', message };
     if (!chatHistory[roomId]) chatHistory[roomId] = [];
     chatHistory[roomId].push(msg);
     io.to(roomId).emit('chat-message', msg);
@@ -192,13 +169,12 @@ io.on('connection', (socket) => {
     if (!room || room.size <= 1) {
       roomCleanupTimers[roomId] = setTimeout(() => {
         if (roomTimers[roomId]) { clearInterval(roomTimers[roomId].intervalId); delete roomTimers[roomId]; }
-        delete chatHistory[roomId]; 
-        delete roomVideos[roomId]; 
-        delete roomDailyUrls[roomId]; // Clean up the URL
+        delete chatHistory[roomId];
+        delete roomVideos[roomId];
         delete roomCleanupTimers[roomId];
       }, 5000);
     }
   });
 });
-   
+
 http.listen(port, () => console.log(`✅ Server running at http://localhost:${port}`));

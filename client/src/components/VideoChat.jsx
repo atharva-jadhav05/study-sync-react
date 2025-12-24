@@ -1,155 +1,226 @@
 import React, { useEffect, useState, useRef } from 'react';
-import DailyIframe from '@daily-co/daily-js';
-import './VideoChat.css'; // We will create this CSS file next
+import { Room, RoomEvent, ParticipantEvent } from 'livekit-client';
+import './VideoChat.css';
 
-const VideoChat = ({ roomUrl, onLeave }) => {
-  const [callObject, setCallObject] = useState(null);
+const VideoChat = ({ roomId, socket, onLeave }) => {
+  const [currentRoom, setCurrentRoom] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [pinnedId, setPinnedId] = useState(null); // The "Stage" user
-
-  // Control States
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
-
   
-  const callRef = useRef(null);
-  const initializedRef = useRef(false);
-  // 1. Initialize Call
+  // 🎛️ Control States
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isHandRaised, setIsHandRaised] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // ✋ Track Remote Hand Raises: { "user_identity": true/false }
+  const [remoteHands, setRemoteHands] = useState({});
+  
+  const localVideoRef = useRef(null);
+
   useEffect(() => {
-    if (!roomUrl) return;
+    if (!socket || !roomId) return;
 
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-    
-    callRef.current = DailyIframe.createCallObject();
-    setCallObject(callRef.current);
+    const userName = "User_" + Math.floor(Math.random() * 1000);
+    socket.emit('get-livekit-token', { roomId, userName });
 
-    callRef.current.join({ url: roomUrl });
+    const handleToken = async (token) => {
+        const finalToken = (typeof token === 'object' && token.token) ? token.token : token;
+        
+        const newRoom = new Room({
+            adaptiveStream: true,
+            dynacast: true,
+            publishDefaults: { simulcast: true }
+        });
+        setCurrentRoom(newRoom);
 
-    const updateParticipants = () => {
-      const p = callRef.current.participants();
-      setParticipants(Object.values(p));
-    };
+        try {
+            await newRoom.connect('ws://localhost:7880', finalToken);
+            
+            // 1. Initial Media Setup
+            const { track: videoTrack } = await newRoom.localParticipant.setCameraEnabled(true);
+            if (localVideoRef.current) {
+                videoTrack.attach(localVideoRef.current);
+            }
+            await newRoom.localParticipant.setMicrophoneEnabled(true);
 
-    // Auto-Pin Screen Shares
-    const handleTrackStart = (event) => {
-        if (event.track.kind === 'video' && event.participant.screen) {
-            setPinnedId(event.participant.session_id);
+            // 2. Event Listeners (Self)
+            newRoom.localParticipant.on(ParticipantEvent.IsSpeakingChanged, setIsSpeaking);
+
+            // 3. Handle Data Messages (Raise Hand from OTHERS)
+            newRoom.on(RoomEvent.DataReceived, (payload, participant, _kind, _topic) => {
+                const strData = new TextDecoder().decode(payload);
+                try {
+                    const data = JSON.parse(strData);
+                    if (data.type === 'hand-raise' && participant) {
+                        setRemoteHands(prev => ({
+                            ...prev,
+                            [participant.identity]: data.value
+                        }));
+                    }
+                } catch (err) {
+                    console.error("Failed to parse data message:", err);
+                }
+            });
+
+            // 4. Handle Participants
+            const updateParticipants = () => {
+                const remotes = Array.from(newRoom.remoteParticipants.values());
+                setParticipants(remotes);
+            };
+            updateParticipants();
+
+            newRoom.on(RoomEvent.ParticipantConnected, updateParticipants);
+            newRoom.on(RoomEvent.ParticipantDisconnected, updateParticipants);
+            newRoom.on(RoomEvent.TrackSubscribed, updateParticipants);
+            newRoom.on(RoomEvent.TrackUnsubscribed, updateParticipants);
+
+        } catch (error) {
+            console.error("Failed to connect:", error);
         }
-        updateParticipants();
     };
 
-    callRef.current.on('joined-meeting', updateParticipants);
-    callRef.current.on('participant-joined', updateParticipants);
-    callRef.current.on('participant-updated', updateParticipants);
-    callRef.current.on('participant-left', updateParticipants);
-    callRef.current.on('track-started', handleTrackStart);
+    socket.on('livekit-token', handleToken);
 
     return () => {
-      callRef.current.leave();
-      callRef.current.destroy();
+        socket.off('livekit-token', handleToken);
+        if (currentRoom) currentRoom.disconnect();
     };
-  }, [roomUrl]);
+  }, [roomId, socket]);
 
-  // 2. Control Functions
-  const toggleAudio = () => {
-    callObject.setLocalAudio(!isMuted);
-    setIsMuted(!isMuted);
+  // --- BUTTON HANDLERS ---
+
+  const toggleMic = async () => {
+      if (!currentRoom) return;
+      const newState = !isMicOn;
+      await currentRoom.localParticipant.setMicrophoneEnabled(newState);
+      setIsMicOn(newState);
   };
 
-  const toggleVideo = () => {
-    callObject.setLocalVideo(!isCameraOff);
-    setIsCameraOff(!isCameraOff);
+  const toggleCamera = async () => {
+      if (!currentRoom) return;
+      const newState = !isCameraOn;
+      await currentRoom.localParticipant.setCameraEnabled(newState);
+      setIsCameraOn(newState);
   };
 
-  const leaveCall = () => {
-    if (callObject) callObject.leave();
-    if (onLeave) onLeave(); // Trigger parent redirect
+  const toggleScreenShare = async () => {
+      if (!currentRoom) return;
+      const newState = !isScreenSharing;
+      await currentRoom.localParticipant.setScreenShareEnabled(newState);
+      setIsScreenSharing(newState);
   };
 
-  const handlePin = (id) => {
-      setPinnedId(pinnedId === id ? null : id); // Toggle pin
-  };
+  const toggleHandRaise = async () => {
+      if (!currentRoom) return;
+      const newState = !isHandRaised;
+      setIsHandRaised(newState);
 
-  // 3. Layout Logic
-  const renderTile = (p, isPinnedView = false) => {
-      return (
-        <div 
-            key={p.session_id} 
-            className={`video-tile ${isPinnedView ? 'pinned' : ''}`} 
-            onClick={() => handlePin(p.session_id)}
-        >
-            <VideoTile participant={p} />
-            <div className="user-name">{p.user_name || "Guest"} {p.local && "(You)"}</div>
-            {p.screen && <div className="screen-badge">Presenting</div>}
-        </div>
-      );
+      // Send to everyone else
+      const data = JSON.stringify({ type: 'hand-raise', value: newState });
+      const encoder = new TextEncoder();
+      await currentRoom.localParticipant.publishData(encoder.encode(data), { reliable: true });
   };
-
-  // If someone is pinned, separate them from the rest
-  const pinnedParticipant = participants.find(p => p.session_id === pinnedId);
-  const otherParticipants = participants.filter(p => p.session_id !== pinnedId);
 
   return (
-    <div className="video-chat-container">
-      
-      {/* --- VIDEO AREA --- */}
-      <div className={`video-stage ${pinnedId ? 'has-pin' : 'grid-mode'}`}>
-        
-        {/* Pinned Mode: The Big Stage */}
-        {pinnedId && pinnedParticipant && (
-            <div className="main-stage">
-                {renderTile(pinnedParticipant, true)}
+    <div className="video-container-relative"> 
+      <div className="custom-video-grid">
+        {/* YOUR FACE */}
+        {/* 🟢 ADDED: 'screen-share' class logic to fix flipping */}
+        <div className={`video-wrapper local ${isScreenSharing ? 'screen-share' : ''} ${isSpeaking ? 'speaking' : ''}`}>
+            <video ref={localVideoRef} className="video-player" muted />
+            <div className="name-tag">
+                You {isHandRaised ? '✋' : ''}
             </div>
-        )}
-
-        {/* Filmstrip or Grid */}
-        <div className={`participant-list ${pinnedId ? 'filmstrip' : 'grid'}`}>
-            {(pinnedId ? otherParticipants : participants).map(p => renderTile(p))}
-            
-            {/* Empty Placeholders (Only in grid mode to fill space) */}
-            {!pinnedId && participants.length < 2 && (
-                <div className="video-tile placeholder">Waiting for friends...</div>
-            )}
+            {isHandRaised && <div className="hand-badge">✋</div>}
         </div>
-      </div>
 
-      {/* --- CONTROL BAR --- */}
-      <div className="control-bar">
-        <button onClick={toggleAudio} className={isMuted ? "red" : ""}>
-          {isMuted ? "Unmute" : "Mute"}
+        {/* FRIENDS FACES */}
+        {participants.map((p) => (
+            <RemoteParticipant 
+                key={p.identity} 
+                participant={p} 
+                isHandRaised={remoteHands[p.identity] || false} // Pass the state down
+            />
+        ))}
+      </div>
+      
+      {/* 🎛️ CONTROL BAR */}
+      <div className="controls-bar">
+        <button className={`control-btn ${!isMicOn ? 'off' : ''}`} onClick={toggleMic}>
+            {isMicOn ? '🎤' : '🔇'}
         </button>
-        <button onClick={toggleVideo} className={isCameraOff ? "red" : ""}>
-          {isCameraOff ? "Start Cam" : "Stop Cam"}
+
+        <button className={`control-btn ${!isCameraOn ? 'off' : ''}`} onClick={toggleCamera}>
+            {isCameraOn ? '📹' : '🚫'}
         </button>
-        <button onClick={leaveCall} className="leave-btn">
-          Leave Room
+
+        <button className={`control-btn ${isScreenSharing ? 'active' : ''}`} onClick={toggleScreenShare}>
+            {isScreenSharing ? '💻' : '📺'}
+            {/* 🟢 ADDED: Popup Text */}
+            {isScreenSharing && (
+                <div className="screen-share-popup">You are sharing screen</div>
+            )}
+        </button>
+
+        <button className={`control-btn ${isHandRaised ? 'active' : ''}`} onClick={toggleHandRaise}>
+            ✋
+        </button>
+
+        <button className="control-btn leave-btn-icon" onClick={onLeave}>
+            📞
         </button>
       </div>
     </div>
   );
 };
 
-// Sub-component for the actual <video> tag
-const VideoTile = ({ participant }) => {
-  const videoRef = useRef(null);
+// --- Helper Component for Remote Users ---
+const RemoteParticipant = ({ participant, isHandRaised }) => {
+    const videoRef = useRef(null);
+    const audioRef = useRef(null);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
-  useEffect(() => {
-    if (!participant.video || !videoRef.current) return;
-    const track = participant.videoTrack || participant.tracks?.video?.persistentTrack;
-    if (track) {
-      videoRef.current.srcObject = new MediaStream([track]);
-    }
-  }, [participant, participant.videoTrack]);
+    useEffect(() => {
+        // 1. Media Tracks
+        const attachTrack = (track) => {
+            if (track.kind === 'video' && videoRef.current) {
+                track.attach(videoRef.current);
+            }
+            if (track.kind === 'audio' && audioRef.current) {
+                track.attach(audioRef.current);
+            }
+        };
 
-  return (
-    <video 
-      ref={videoRef} 
-      autoPlay 
-      muted={participant.local} 
-      playsInline 
-    />
-  );
+        participant.trackPublications.forEach(pub => {
+            if (pub.track) attachTrack(pub.track);
+        });
+
+        participant.on(RoomEvent.TrackSubscribed, attachTrack);
+
+        // 2. Speaking Detection
+        const handleSpeaking = (speaking) => setIsSpeaking(speaking);
+        participant.on(ParticipantEvent.IsSpeakingChanged, handleSpeaking);
+        
+        return () => {
+            participant.off(RoomEvent.TrackSubscribed, attachTrack);
+            participant.off(ParticipantEvent.IsSpeakingChanged, handleSpeaking);
+        };
+    }, [participant]);
+
+    return (
+        <div className={`video-wrapper remote ${isSpeaking ? 'speaking' : ''}`}>
+            <video ref={videoRef} className="video-player" />
+            <audio ref={audioRef} autoPlay />
+            
+            <div className="name-tag">
+                {participant.identity} {isSpeaking ? '🔊' : ''}
+            </div>
+
+            {/* Hand Raise Badge */}
+            {isHandRaised && <div className="hand-badge">✋</div>}
+        </div>
+    );
 };
 
 export default VideoChat;
