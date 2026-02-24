@@ -1,23 +1,25 @@
-import { BrowserRouter, Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
 // Pages & Components
-import LandingPage from './pages/LandingPage';
-import MusicMixer from './components/MusicMixer';
-import YouTubePlayer from './components/YouTubePlayer';
-import ChatBox from './components/ChatBox';
-import Timer from './components/Timer';
-import VideoChat from './components/VideoChat';
+import LandingPage from './pages/LandingPage/LandingPage';
+import Whiteboard from './components/WhiteBoard/Whiteboard'; 
+import YouTubePlayer from './components/YouTubePlayer/YouTubePlayer';
+import ChatBox from './components/ChatBox/ChatBox';
+import Timer from './components/Timer/Timer';
+import VideoChat from './components/VideoChat/VideoChat';
+import TodoList from "./components/ToDoList/TodoList"; // ← ADDED
 import './App.css';
 
 // --- THE MAIN ROOM COMPONENT ---
 const StudyRoom = () => {
   const { roomId } = useParams(); 
-  const location = useLocation();
   const navigate = useNavigate();
   
   const [socket, setSocket] = useState(null);
+  const [isInCall, setIsInCall] = useState(false);
+  const [showWhiteboard, setShowWhiteboard] = useState(false); 
   
   useEffect(() => {
     // Connect to server
@@ -26,18 +28,23 @@ const StudyRoom = () => {
 
     // Join the specific room
     newSocket.emit('join-room', roomId);
+    
+    setIsInCall(true);
 
     // Cleanup on exit
-    return () => newSocket.disconnect();
+    return () => {
+      setIsInCall(false);
+      newSocket.disconnect();
+    };
   }, [roomId]);
 
   const handleLeaveRoom = () => {
+      setIsInCall(false);
       if (socket) socket.disconnect();
       navigate('/');
       window.location.reload(); 
   };
 
-  // Wait for socket to be ready before rendering room
   if (!socket) return <div className="loading">Connecting to Study Sync...</div>;
 
   return (
@@ -45,18 +52,42 @@ const StudyRoom = () => {
       {/* Top Bar */}
       <div className="top-bar">
         <Timer socket={socket} roomId={roomId} />
-        <MusicMixer />
+        
+        {/* TodoList Button ← ADDED */}
+        <TodoList socket={socket} roomId={roomId} />
+        
+        {/* Toggle Button: Only visible when whiteboard is CLOSED */}
+        {!showWhiteboard && (
+            <button 
+              className="whiteboard-toggle-btn" 
+              onClick={() => setShowWhiteboard(true)}
+              style={{ marginLeft: '15px' }} 
+            >
+              ✏️ Open Whiteboard
+            </button>
+        )}
       </div>
 
       {/* Main Video Grid */}
       <div className="main-content">
         <div className="video-grid">
-           {/* 👇 UPDATED: We pass 'socket' so VideoChat can get its own token */}
            <VideoChat 
                roomId={roomId} 
                socket={socket} 
                onLeave={handleLeaveRoom} 
            />
+        </div>
+
+        {/* Whiteboard Overlay */}
+        <div 
+            className="whiteboard-overlay" 
+            style={{ display: showWhiteboard ? 'flex' : 'none' }}
+        >
+            <Whiteboard 
+                socket={socket} 
+                roomId={roomId} 
+                onClose={() => setShowWhiteboard(false)} 
+            />
         </div>
       </div>
 

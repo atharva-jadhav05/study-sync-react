@@ -1,0 +1,201 @@
+/* --- FULL SCREEN WRAPPER --- */
+.whiteboard-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #333;
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- SIDEBAR --- */
+.whiteboard-sidebar {
+    width: 90px;
+    height: 100%;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    
+    /* 🛑 CHANGED: We use flex-start so 'margin-top: auto' works correctly below */
+    justify-content: flex-start; 
+    
+    align-items: center;
+    padding: 20px 0;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+    z-index: 10000;
+    overflow: visible; 
+    flex-shrink: 0;
+}
+
+/* 🛑 REMOVED .sidebar-bottom from this list so we can style it separately */
+.sidebar-top, .sidebar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    position: relative;
+}
+
+/* 🛑 NEW: Specific Bottom Section Styling */
+.sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    position: relative;
+    
+    /* Pushes this section to the bottom of the bar */
+    margin-top: auto; 
+    
+    /* LIFTS the button up so it has the gap you wanted */
+    padding-bottom: 40px; 
+}
+
+.sidebar-divider {
+    width: 50%;
+    height: 1px;
+    background: #444;
+    margin: 5px 0;
+}
+
+/* --- BUTTONS --- */
+.sidebar-btn {
+    width: 55px;
+    height: 55px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.sidebar-btn:hover { background: #333; }
+.sidebar-btn.active { background: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
+
+/* HUGE SVGS */
+.sidebar-btn svg {
+    width: 32px !important;
+    height: 32px !important;
+    stroke: #aaa;
+    stroke-width: 2px;
+    fill: none;
+    display: block;
+}
+.sidebar-btn:hover svg, .sidebar-btn.active svg { stroke: white; }
+
+/* Special Buttons */
+.sidebar-btn.danger:hover { background: #450a0a; }
+.sidebar-btn.danger svg { stroke: #f87171; }
+
+.sidebar-btn.success:hover { background: #052e16; }
+.sidebar-btn.success svg { stroke: #4ade80; }
+
+.sidebar-btn.close-btn:hover { background: #7f1d1d; }
+.sidebar-btn.close-btn svg { stroke: #fca5a5; }
+
+/* Color Picker */
+.sidebar-color {
+    width: 45px;
+    height: 45px;
+    border: 2px solid #555;
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+}
+
+/* --- SLIDER --- */
+.slider-group {
+    height: 140px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.slider-label {
+    color: #aaa; font-size: 11px; font-weight: bold; margin-bottom: 5px;
+}
+
+.vertical-range {
+    transform: rotate(270deg);
+    width: 100px;
+    height: 20px;
+    background: transparent;
+    cursor: pointer;
+    margin: 40px 0;
+}
+
+/* --- SHAPE POPOVER --- */
+.relative-group {
+    padding-right: 20px; 
+    margin-right: -20px; 
+}
+
+.relative-group:hover .shape-popover {
+    display: flex;
+}
+
+.shape-popover {
+    display: none;
+    position: absolute;
+    left: 100%; 
+    top: 0;
+    margin-left: -5px; 
+    padding-left: 20px; 
+    background: transparent; 
+    flex-direction: column;
+    z-index: 20000;
+}
+
+.shape-popover-inner {
+    background: #252525;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 4px 4px 15px rgba(0,0,0,0.5);
+}
+
+.shape-popover-inner div {
+    width: 45px; height: 45px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border-radius: 6px; font-size: 1.5rem; color: #fff;
+    background: #333;
+}
+.shape-popover-inner div:hover { background: #3b82f6; }
+
+/* --- CANVAS AREA --- */
+.canvas-scroll-container {
+    flex-grow: 1;
+    overflow: auto;
+    display: block; 
+    padding: 0;
+    background: #333; 
+    position: relative;
+    cursor: crosshair;
+}
+
+canvas {
+    background-color: white;
+    display: block;
+    box-shadow: 4px 4px 20px rgba(0,0,0,0.5); 
+}
+.eraser-mode canvas { cursor: cell; }

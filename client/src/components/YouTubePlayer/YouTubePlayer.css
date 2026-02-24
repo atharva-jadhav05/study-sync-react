@@ -1,0 +1,98 @@
+/* ========================================= */
+/* YOUTUBE PLAYER WIDGET                */
+/* ========================================= */
+
+.youtube-box {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  
+  /* Flex Layout for vertical stacking */
+  display: flex;
+  flex-direction: column;
+  
+  background: #1e1f22;
+  border: 1px solid #444;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  overflow: hidden; /* Clips the corners of the video */
+  min-width: 320px; /* Prevents it from getting too skinny */
+}
+
+/* --- DRAGGABLE RESIZE HANDLE --- */
+.resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  cursor: nw-resize; /* Diagonal cursor */
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.5;
+  user-select: none;
+}
+.resize-handle:hover { opacity: 1; }
+
+/* --- CONTROLS BAR --- */
+.yt-controls {
+  padding: 10px;
+  background: #2b2d31;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #111;
+  align-items: center;
+}
+
+/* INPUT FIELD */
+.yt-controls input {
+  flex: 1; /* Takes up all remaining space */
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #111;
+  background: #383a40;
+  color: white;
+  outline: none;
+  font-size: 0.9rem;
+}
+.yt-controls input:focus {
+  background: #404249;
+  border-color: #5865F2;
+}
+
+/* BUTTONS (Base Style) */
+.yt-controls button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  background: #5865F2; /* Default Blue */
+  white-space: nowrap;
+}
+
+.yt-controls button:hover {
+  filter: brightness(1.1);
+}
+
+/* --- VIDEO AREA --- */
+.player-wrapper {
+  background: black;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Ensure the iframe fills the wrapper */
+#yt-player-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
