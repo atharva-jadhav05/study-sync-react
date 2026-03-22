@@ -12,9 +12,11 @@
   "dependencies": {
     "axios": "^1.13.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "livekit-client": "^2.16.1",
     "livekit-server-sdk": "^2.15.0",
+    "nanoid": "^5.1.6",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {

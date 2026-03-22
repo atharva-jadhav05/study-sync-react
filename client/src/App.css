@@ -1,5 +1,6 @@
 /* --- GLOBAL RESET --- */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -16,131 +17,198 @@ html, body {
   width: 100%;
 }
 
-/* --- LANDING PAGE --- */
-.landing-container {
+.app-container {
+  width: 100%;
+  height: 100%;
+  background-color: #202124;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  overflow: hidden;
 }
 
-.landing-card {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 40px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-  backdrop-filter: blur(10px);
-  min-width: 400px;
-}
-
-.landing-card h1 {
-  margin-bottom: 20px;
-  font-size: 2.5rem;
-}
-
-/* --- TOP BAR --- */
+/* --- TOP BAR (POSITIONING ONLY) --- */
 .top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
   height: 70px;
-  background-color: #1e1e1e;
-  border-bottom: 1px solid #333;
   z-index: 2000;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   box-sizing: border-box;
+  background-color: #202124;
+  border-bottom: 1px solid #3c4043;
+  flex-shrink: 0;
 }
 
-/* --- TIMER --- */
+/* Re-enable clicks for buttons inside the top bar */
+.top-bar>* {
+  pointer-events: auto;
+}
+
+/* --- TIMER (POSITIONING ONLY) --- */
 .timer-widget {
-  background: #111121;
-  padding: 10px 20px;
-  border-radius: 10px;
-  cursor: pointer;
   width: 150px;
   text-align: center;
-  font-size: 1.2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* --- MUSIC --- */
-.music-wrapper {
-  position: relative;
-  display: inline-block;
-  z-index: 3000;
-}
-
-.music-btn {
-  background: rgba(255, 255, 255, 0.1);
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-/* ============================
-   ✅ MAIN CONTENT (SCROLL HERE)
-   ============================ */
+/* --- MAIN CONTENT (POSITIONING ONLY) --- */
 .main-content {
   position: relative;
   width: 100%;
-  height: calc(100vh - 70px);
-  margin-top: 70px;
-
+  flex: 1;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  overflow: hidden;
+  background-color: #202124;
+}
 
-  overflow-y: auto;   /* ✅ SCROLL */
-  overflow-x: hidden;
+/* Hide scrollbar for Chrome, Safari and Opera */
+.main-content::-webkit-scrollbar {
+  display: none;
 }
 
 /* Container for VideoChat */
 .video-grid {
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
 }
 
-/* --- CHAT BOX --- */
-.chat-container {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 300px;
-  height: 250px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid #444;
-  border-radius: 10px;
+/* --- BOTTOM BAR (POSITIONING ONLY) --- */
+.bottom-bar {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  z-index: 2000;
   display: flex;
-  flex-direction: column;
-  z-index: 100;
+  justify-content: center;
+  /* Center the control bar */
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+  background-color: #202124;
+  flex-shrink: 0;
 }
 
-/* --- YOUTUBE PLAYER --- */
-.youtube-box {
+/* Re-enable clicks for components inside the bottom bar */
+.bottom-bar>* {
+  pointer-events: auto;
+}
+
+/* LEFT SIDE BUTTONS (YouTube & Whiteboard) */
+.bottom-left-buttons {
   position: absolute;
-  bottom: 20px;
+  left: 20px;
+  bottom: 25px;
+  /* Similar height to chat toggle */
+  display: flex;
+  gap: 12px;
+  z-index: 2005;
+}
+
+.icon-btn {
+  width: 60px;
+  /* Wider for rectangle */
+  height: 44px;
+  border-radius: 12px;
+  /* Rounded rectangle */
+  border: none;
+  background: #3c4043;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.icon-btn:hover {
+  background: #5f6368;
+  transform: translateY(-2px);
+}
+
+.icon-btn.active {
+  background: #8ab4f8;
+  color: #202124;
+}
+
+/* Chat box - positioned on the right */
+.bottom-bar>.chat-widget {
+  position: absolute;
   right: 20px;
-  background: black;
-  border: 1px solid #333;
-  border-radius: 10px;
+  bottom: 10px;
+}
+
+/* --- YOUTUBE POPUP CONTAINER --- */
+.youtube-popup-container {
+  position: fixed;
+  bottom: 90px;
+  left: 20px;
+  /* width/height auto to fit content */
+  z-index: 10000;
   display: flex;
   flex-direction: column;
+  pointer-events: none;
+  /* Default none */
+}
+
+.youtube-popup-container.visible {
+  pointer-events: none;
+  /* Container is transparent, box catches clicks */
+  /* No background dimming */
+}
+
+.youtube-popup-container.hidden {
+  display: none;
+}
+
+/* Ensure the player box itself is clickable and distinct */
+.youtube-popup-container .youtube-box {
+  pointer-events: auto;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+  background: #202124;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+/* --- CHAT BOX --- */
+.chat-container {
+  width: 300px;
+  height: 250px;
   z-index: 100;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- WHITEBOARD OVERLAY --- */
+.whiteboard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 20000;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.whiteboard-toggle-btn {
+  background: #444;
+  color: white;
+  border: 1px solid #666;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.whiteboard-toggle-btn:hover {
+  background: #555;
 }

@@ -1,4 +1,40 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+client/.env.local
+
+# Dependencies
 node_modules/
 client/node_modules/
-.env
-*.exe
+
+# Build outputs
+dist/
+client/dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+.DS_Store?
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# LiveKit
+livekit-server.exe
+livekit-server
+
+# Testing
+coverage/

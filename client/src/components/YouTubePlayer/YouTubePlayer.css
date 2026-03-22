@@ -1,0 +1,136 @@
+/* ========================================= */
+/* YOUTUBE PLAYER WIDGET                */
+/* ========================================= */
+
+.youtube-box {
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #1e1f22;
+  border: 1px solid #444;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  min-width: 320px;
+}
+
+/* --- DRAGGABLE HEADER / RESIZE HANDLE --- */
+.resize-handle {
+  position: relative;
+  /* Fix overlapping issue */
+  width: 100%;
+  height: 32px;
+  /* Slightly taller for better touch */
+  background: #2b2d31;
+  border-bottom: 1px solid #1e1f22;
+  cursor: grab;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 14px;
+  user-select: none;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.resize-handle span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.resize-handle:active {
+  cursor: grabbing;
+  background: #32353b;
+}
+
+.yt-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.yt-close-btn:hover {
+  background: #da373c;
+  border-color: #da373c;
+  color: white;
+}
+
+/* --- CONTROLS BAR --- */
+.yt-controls {
+  padding: 12px;
+  background: #313338;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #1e1f22;
+  align-items: center;
+}
+
+/* INPUT FIELD */
+.yt-controls input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  background: #1e1f22;
+  color: #dbdee1;
+  outline: none;
+  font-size: 13px;
+  transition: box-shadow 0.2s;
+}
+
+.yt-controls input:focus {
+  box-shadow: 0 0 0 2px #5865F2;
+}
+
+.yt-controls input::placeholder {
+  color: #72767d;
+}
+
+/* BUTTONS */
+.yt-controls button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+  font-size: 13px;
+  transition: all 0.2s;
+  background: #5865F2;
+  white-space: nowrap;
+}
+
+.yt-controls button:hover {
+  background: #4752c4;
+}
+
+/* --- VIDEO AREA --- */
+.player-wrapper {
+  background: black;
+  width: 100%;
+  flex: 1;
+  /* Take remaining height */
+  position: relative;
+  min-height: 0;
+}
+
+/* Ensure the iframe fills the wrapper */
+#yt-player-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

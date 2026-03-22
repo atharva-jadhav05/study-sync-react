@@ -1,0 +1,497 @@
+/* Timer Widget - Compact & Professional */
+.timer-widget {
+  position: fixed;
+  top: 1px;
+  left: 1px;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(27, 38, 56, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 20px 0 rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  letter-spacing: 2px;
+  z-index: 999;
+  min-width: 90px;
+  max-width: 110px;
+  text-align: center;
+}
+
+.timer-widget:hover {
+  background: rgba(27, 38, 56, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 28px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Modal Overlay - Transparent */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 998;
+}
+
+/* Modal Content - Professional Glassmorphism */
+.modal-content {
+  position: fixed;
+  top: 61px;
+  left: 50px;
+  background: rgba(30, 41, 59, 0.88);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 18px;
+  width: 220px;
+  max-width: calc(100vw - 70px);
+  box-shadow: 
+    0 24px 48px -12px rgba(0, 0, 0, 0.6),
+    0 8px 16px -8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+  animation: dropDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+}
+
+/* Dropdown arrow pointer - More refined */
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 20px;
+  width: 14px;
+  height: 14px;
+  background: rgba(30, 41, 59, 0.88);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  transform: rotate(45deg);
+  z-index: -1;
+}
+
+@keyframes dropDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content h2 {
+  margin: 0 0 14px 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.modal-content label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.modal-content input[type="number"] {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: all 0.2s ease;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content input[type="number"]:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(99, 179, 237, 0.5);
+  box-shadow: 
+    0 0 0 3px rgba(99, 179, 237, 0.12),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content input[type="number"]:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.modal-content input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #63b3ed;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+/* Checkbox label styling */
+.modal-content label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0.2px;
+}
+
+/* Timer Controls (for running timer) */
+.timer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.timer-controls button {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  height: 36px;
+}
+
+/* Pause Button */
+.btn-pause {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  box-shadow: 
+    0 4px 14px 0 rgba(245, 158, 11, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-pause:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 18px 0 rgba(245, 158, 11, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-pause:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px 0 rgba(245, 158, 11, 0.35),
+    inset 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Resume Button */
+.btn-resume {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 
+    0 4px 14px 0 rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-resume:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 18px 0 rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-resume:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px 0 rgba(16, 185, 129, 0.35),
+    inset 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Reset Button */
+.btn-reset {
+  background: rgba(239, 68, 68, 0.15);
+  color: rgba(239, 68, 68, 0.95);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 2px 8px 0 rgba(239, 68, 68, 0.15);
+}
+
+.btn-reset:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-reset:active {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(0);
+  box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Modal Actions - Horizontal */
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  height: 36px;
+}
+
+.btn-start {
+  background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%);
+  color: #fff;
+  box-shadow: 
+    0 4px 14px 0 rgba(99, 179, 237, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 18px 0 rgba(99, 179, 237, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-start:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px 0 rgba(99, 179, 237, 0.35),
+    inset 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 2px 8px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.btn-cancel:active {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(0);
+  box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Remove number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablets and small laptops (768px - 1024px) */
+@media (max-width: 1024px) {
+  .timer-widget {
+    font-size: 14px;
+    padding: 8px 14px;
+    min-width: 85px;
+    max-width: 105px;
+  }
+  
+  .modal-content {
+    width: 210px;
+    padding: 16px;
+  }
+}
+
+/* Mobile landscape and small tablets (481px - 768px) */
+@media (max-width: 768px) {
+  .timer-widget {
+    top: 12px;
+    left: 12px;
+    font-size: 13px;
+    padding: 7px 13px;
+    letter-spacing: 1.5px;
+    min-width: 80px;
+    max-width: 100px;
+  }
+  
+  .modal-content {
+    top: 50px;
+    left: 42px;
+    width: 200px;
+    padding: 15px;
+  }
+  
+  .modal-content::before {
+    left: 16px;
+  }
+}
+
+/* Mobile portrait (320px - 480px) */
+@media (max-width: 480px) {
+  .timer-widget {
+    top: 10px;
+    left: 10px;
+    font-size: 12px;
+    padding: 6px 12px;
+    min-width: 75px;
+    max-width: 95px;
+  }
+  
+  .modal-content {
+    top: 45px;
+    left: 10px;
+    width: calc(100vw - 20px);
+    max-width: 260px;
+    padding: 16px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .modal-content input[type="number"],
+  .modal-actions button,
+  .timer-controls button {
+    min-height: 40px;
+  }
+  
+  .timer-widget:hover {
+    transform: none;
+  }
+  
+  .btn-start:hover,
+  .btn-cancel:hover,
+  .btn-pause:hover,
+  .btn-resume:hover,
+  .btn-reset:hover {
+    transform: none;
+  }
+}
+/* make sure the button is a positioning anchor */
+.timer-widget {
+  position: relative;
+}
+
+/* toast is now COMPLETELY OUT OF LAYOUT */
+.phase-toast {
+  position: absolute;
+  top: 0;
+  left: 100%;
+
+  height: 100%;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+
+
+  border-radius: 0 4px 4px 0;
+  white-space: nowrap;
+  pointer-events: none;
+
+  z-index: 9999;
+
+  animation: toastOut 3s ease forwards;
+}
+
+.phase-toast.study {
+  background: linear-gradient(
+    90deg,
+    rgba(34, 197, 94, 0.95) 0%,
+    rgba(34, 197, 94, 0.8) 45%,
+    rgba(34, 197, 94, 0.35) 75%,
+    rgba(34, 197, 94, 0.0) 100%
+  );
+}
+.phase-toast.break {
+  background: linear-gradient(
+    90deg,
+    rgba(249, 115, 22, 0.95) 0%,
+    rgba(249, 115, 22, 0.8) 45%,
+    rgba(249, 115, 22, 0.35) 75%,
+    rgba(249, 115, 22, 0.0) 100%
+  );
+}
+
+
+@keyframes toastOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}

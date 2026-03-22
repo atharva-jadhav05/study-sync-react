@@ -1,24 +1,37 @@
-import { BrowserRouter, Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
 // Pages & Components
-import LandingPage from './pages/LandingPage';
-import MusicMixer from './components/MusicMixer';
-import YouTubePlayer from './components/YouTubePlayer';
-import ChatBox from './components/ChatBox';
-import Timer from './components/Timer';
-import VideoChat from './components/VideoChat';
+import LandingPage from './pages/LandingPage/LandingPage';
+import Whiteboard from './components/WhiteBoard/Whiteboard';
+import YouTubePlayer from './components/YouTubePlayer/YouTubePlayer';
+import ChatBox from './components/ChatBox/ChatBox';
+import Timer from './components/Timer/Timer';
+import VideoChat from './components/VideoChat/VideoChat';
+import TodoList from "./components/ToDoList/TodoList";
+import ControlBar from './components/ControlBar/ControlBar';
 import './App.css';
 
 // --- THE MAIN ROOM COMPONENT ---
 const StudyRoom = () => {
-  const { roomId } = useParams(); 
-  const location = useLocation();
+  const { roomId } = useParams();
   const navigate = useNavigate();
-  
+
   const [socket, setSocket] = useState(null);
-  
+  const [isInCall, setIsInCall] = useState(false);
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [showYouTube, setShowYouTube] = useState(false); // New state for YouTube popup
+
+  // Control bar states (lifted from VideoChat)
+  const [controlHandlers, setControlHandlers] = useState(null);
+  const [controlStates, setControlStates] = useState({
+    isMicOn: true,
+    isCameraOn: true,
+    isScreenSharing: false,
+    isHandRaised: false
+  });
+
   useEffect(() => {
     // Connect to server
     const newSocket = io('http://localhost:3000');
@@ -27,17 +40,22 @@ const StudyRoom = () => {
     // Join the specific room
     newSocket.emit('join-room', roomId);
 
+    setIsInCall(true);
+
     // Cleanup on exit
-    return () => newSocket.disconnect();
+    return () => {
+      setIsInCall(false);
+      newSocket.disconnect();
+    };
   }, [roomId]);
 
   const handleLeaveRoom = () => {
-      if (socket) socket.disconnect();
-      navigate('/');
-      window.location.reload(); 
+    setIsInCall(false);
+    if (socket) socket.disconnect();
+    navigate('/');
+    window.location.reload();
   };
 
-  // Wait for socket to be ready before rendering room
   if (!socket) return <div className="loading">Connecting to Study Sync...</div>;
 
   return (
@@ -45,24 +63,77 @@ const StudyRoom = () => {
       {/* Top Bar */}
       <div className="top-bar">
         <Timer socket={socket} roomId={roomId} />
-        <MusicMixer />
+        <TodoList socket={socket} roomId={roomId} />
       </div>
 
       {/* Main Video Grid */}
       <div className="main-content">
         <div className="video-grid">
-           {/* 👇 UPDATED: We pass 'socket' so VideoChat can get its own token */}
-           <VideoChat 
-               roomId={roomId} 
-               socket={socket} 
-               onLeave={handleLeaveRoom} 
-           />
+          <VideoChat
+            roomId={roomId}
+            socket={socket}
+            onLeave={handleLeaveRoom}
+            onControlsReady={setControlHandlers}
+            onStatesChange={setControlStates}
+          />
+        </div>
+
+        {/* Whiteboard Overlay */}
+        <div
+          className="whiteboard-overlay"
+          style={{ display: showWhiteboard ? 'flex' : 'none' }}
+        >
+          <Whiteboard
+            socket={socket}
+            roomId={roomId}
+            onClose={() => setShowWhiteboard(false)}
+          />
+        </div>
+
+        {/* YouTube Popup Overlay - Hidden by default */}
+        <div className={`youtube-popup-container ${showYouTube ? 'visible' : 'hidden'}`}>
+          <YouTubePlayer
+            socket={socket}
+            roomId={roomId}
+            onClose={() => setShowYouTube(false)}
+          />
         </div>
       </div>
 
-      {/* Bottom Widgets */}
-      <ChatBox socket={socket} roomId={roomId} />
-      <YouTubePlayer socket={socket} roomId={roomId} />
+      {/* Bottom Bar */}
+      <div className="bottom-bar">
+        {/* Left Side: YouTube & Whiteboard Toggles */}
+        <div className="bottom-left-buttons">
+          <button
+            className={`icon-btn ${showYouTube ? 'active' : ''}`}
+            onClick={() => setShowYouTube(!showYouTube)}
+            title="Toggle YouTube Player"
+          >
+            📺
+          </button>
+          <button
+            className={`icon-btn ${showWhiteboard ? 'active' : ''}`}
+            onClick={() => setShowWhiteboard(!showWhiteboard)}
+            title="Toggle Whiteboard"
+          >
+            ✏️
+          </button>
+        </div>
+
+        <ControlBar
+          isMicOn={controlStates.isMicOn}
+          isCameraOn={controlStates.isCameraOn}
+          isScreenSharing={controlStates.isScreenSharing}
+          isHandRaised={controlStates.isHandRaised}
+          onToggleMic={controlHandlers?.toggleMic}
+          onToggleCamera={controlHandlers?.toggleCamera}
+          onToggleScreenShare={controlHandlers?.toggleScreenShare}
+          onToggleHandRaise={controlHandlers?.toggleHandRaise}
+          onLeave={handleLeaveRoom}
+        />
+
+        <ChatBox socket={socket} roomId={roomId} />
+      </div>
     </div>
   );
 };

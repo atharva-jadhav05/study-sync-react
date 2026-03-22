@@ -1,0 +1,188 @@
+/* ========================================= */
+/* CHAT WIDGET (Toggle & Window)        */
+/* ========================================= */
+
+/* 1. Container - Now in Bottom Bar */
+.chat-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* Align to right side */
+  gap: 10px;
+  position: relative;
+}
+
+/* 2. The Round Toggle Button */
+.chat-toggle-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #5865F2;
+  /* Discord Blurple */
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chat-toggle-btn:hover {
+  transform: scale(1.1);
+  background-color: #4752c4;
+}
+
+/* 3. The Chat Window (Hidden/Shown logic) */
+.chat-window {
+  width: 320px;
+  height: 450px;
+  background: #2b2d31;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #444;
+
+  /* Transition Logic */
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  /* Click-through when hidden */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  /* Position absolute relative to the .chat-widget container */
+  position: absolute;
+  bottom: 75px;
+  /* Sits right above the button */
+  right: 0;
+}
+
+/* Class added by React when isOpen is true */
+.chat-window.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  /* Re-enable clicks */
+}
+
+/* 4. Chat Header */
+.chat-header {
+  padding: 12px 15px;
+  background: #1e1f22;
+  border-bottom: 1px solid #111;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #f2f3f5;
+}
+
+.close-mini-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+}
+
+.close-mini-btn:hover {
+  color: white;
+}
+
+/* 5. Messages Area */
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #313338;
+}
+
+.message {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+  color: #dbdee1;
+}
+
+.message strong {
+  color: #5865F2;
+  margin-right: 6px;
+}
+
+/* 6. Input Area */
+.chat-input-area {
+  padding: 10px;
+  background: #2b2d31;
+  border-top: 1px solid #1e1f22;
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #383a40;
+  color: white;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.chat-input-area input:focus {
+  background: #404249;
+}
+
+.chat-input-area button {
+  padding: 0 15px;
+  background: #5865F2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.chat-input-area button:hover {
+  background: #4752c4;
+}
+
+/* 7. Red Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ff4757;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #222;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
